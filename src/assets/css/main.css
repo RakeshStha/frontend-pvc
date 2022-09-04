@@ -1,0 +1,11 @@
+.fullHeight{
+    width: 50%;
+    height: 100vh;
+    background-color: blueviolet;
+}
+
+.buttonTransparent{
+    border: none;
+    outline: none;
+    background-color: transparent;
+}
