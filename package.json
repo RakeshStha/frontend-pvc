@@ -1,4 +1,5 @@
 {
+  "homepage": "https://rakeshstha.github.io/frontend-pvc/",
   "name": "client",
   "version": "0.1.0",
   "private": true,
@@ -16,6 +17,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -27,6 +30,10 @@
       "react-app/jest"
     ]
   },
+  "engines": {
+    "node": "10.17.0",
+    "npm": "6.11.3"
+},
   "browserslist": {
     "production": [
       ">0.2%",
