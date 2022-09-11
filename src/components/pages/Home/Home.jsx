@@ -70,9 +70,9 @@ const Home = () => {
         incomingAudio.play()
       }
       else{
-        incomingAudio.loop = false
-        callingAudio.loop = false
+        incomingAudio.loop=false
         incomingAudio.pause()
+        callingAudio.loop=false
         callingAudio.pause()
         setStatus('Congratulation your are connected successfully')
      
@@ -127,9 +127,9 @@ const Home = () => {
       processSDP(sdp)
       setOfferVisible(false)
       setStatus('Calling...')
+      setCancel(true)
       callingAudio.loop = true
       callingAudio.play()
-      setCancel(true)
     }).catch(e => console.log(e))
   }
 
@@ -144,6 +144,8 @@ const Home = () => {
       setCancel(true)
       incomingAudio.loop=false
       incomingAudio.pause()
+      callingAudio.loop=false
+      callingAudio.pause()
       setStatus('Congratulation your are connected successfully')
     }).catch(e => console.log(e))
   }
