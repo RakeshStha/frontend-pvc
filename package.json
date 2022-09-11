@@ -1,6 +1,6 @@
 {
   "homepage": "https://rakeshstha.github.io/frontend-pvc/",
-  "name": "client",
+  "name": "personal-video-calling-app",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -8,7 +8,7 @@
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
     "bootstrap": "^5.2.0",
-    "font-awesome": "^4.7.0",
+    "gh-pages": "^4.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.3.0",
@@ -33,7 +33,7 @@
   "engines": {
     "node": "10.17.0",
     "npm": "6.11.3"
-},
+  },
   "browserslist": {
     "production": [
       ">0.2%",

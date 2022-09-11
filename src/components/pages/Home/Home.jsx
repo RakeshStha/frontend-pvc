@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useRef } from 'react';
 import socketIOClient from "socket.io-client";
 import CallBackground from "../../../assets/img/call-background.jpg";
+import Calling from '../../../assets/audio/calling.mp3'
+import Incoming from '../../../assets/audio/incoming.mp3'
 
 // const ENDPOINT = `http://${window.location.hostname}:4001`;
 const ENDPOINT = "https://pvc-server.herokuapp.com/"
@@ -11,17 +13,48 @@ const Home = () => {
   const localVideoRef = useRef();
   const remoteVideoRef = useRef();
   const textRef = useRef()
+
+
+  const callingAudio = new Audio(Calling)
+  const incomingAudio = new Audio(Incoming)
+  callingAudio.loop = true
+  incomingAudio.loop = true
+
   // const candidates = useRef([])
+
+  const [Microphone, setMicrophone] = useState(true)
+  const [Video, setVideo] = useState(true)
 
   const [offerVisible, setOfferVisible] = useState(true)
   const [answerVisible, setAnswerVisible] = useState(false)
-  const [status, setStatus] = useState("Make a call")
+  const [status, setStatus] = useState("Click on call button to make a call")
+  const [cancel, setCancel] = useState(false)
   
+  const _pc = new RTCPeerConnection(null)
   const pc = useRef(new RTCPeerConnection(null))
   const socket = socketIOClient(ENDPOINT);
 
-  useEffect(() => {
 
+  useEffect(() => {
+    const constraints = {
+      audio: true,
+      video: true,
+    }
+    // console.log("@data",  constraints)
+
+    navigator.mediaDevices.getUserMedia(constraints)
+    .then(stream => {
+      //display video
+      // console.log("@data", stream)
+   localVideoRef.current.srcObject = stream
+
+   stream.getTracks().forEach(track => {
+    _pc.addTrack(track, stream)
+   })
+    })
+    .catch(e => {
+      console.log('getUsermedia Error: ', e)
+    })
 
     //Printing the sdp get from the server
     socket.on('sdp', data => {
@@ -33,9 +66,16 @@ const Home = () => {
         setOfferVisible(false)
         setAnswerVisible(true)
         setStatus('Incoming call ...')
+        incomingAudio.loop = true
+        incomingAudio.play()
       }
       else{
-        setStatus('Call established')
+        incomingAudio.loop = false
+        callingAudio.loop = false
+        incomingAudio.pause()
+        callingAudio.pause()
+        setStatus('Congratulation your are connected successfully')
+     
       }
 
     })
@@ -46,32 +86,12 @@ const Home = () => {
       pc.current.addIceCandidate(new RTCIceCandidate(candidate))
     })
 
-    const constraints = {
-      audio: false,
-      video: true,
-    }
-
-    navigator.mediaDevices.getUserMedia(constraints)
-    .then(stream => {
-      //display video
-   localVideoRef.current.srcObject = stream
-
-   stream.getTracks().forEach(track => {
-    _pc.addTrack(track, stream)
-   })
-    })
-    .catch(e => {
-      console.log('getUsermedia Error: ', e)
-    })
-
-    const _pc = new RTCPeerConnection(null)
     _pc.onicecandidate = (e) => {
       if(e.candidate)
       console.log(JSON.stringify(e.candidate))
 
       //send to server
       sendToPeer('candidate', e.candidate)
-
     }
     
     _pc.oniceconnectionstatechange = (e) => {
@@ -84,7 +104,6 @@ const Home = () => {
     }
 
     pc.current = _pc
-
   }, [])
 
   const sendToPeer = (eventType, payload) => {
@@ -108,6 +127,9 @@ const Home = () => {
       processSDP(sdp)
       setOfferVisible(false)
       setStatus('Calling...')
+      callingAudio.loop = true
+      callingAudio.play()
+      setCancel(true)
     }).catch(e => console.log(e))
   }
 
@@ -119,58 +141,76 @@ const Home = () => {
       //sending the answer to the offer peer
       processSDP(sdp)
       setAnswerVisible(false)
-      setStatus('Call established')
+      setCancel(true)
+      incomingAudio.loop=false
+      incomingAudio.pause()
+      setStatus('Congratulation your are connected successfully')
     }).catch(e => console.log(e))
   }
 
 const showHideButtons = () => {
   if(offerVisible){
     return(
-      <div>
-        <button onClick={() => createOffer()}>Call</button>
-      </div>
+      <>
+        <button className="text-docaration-none buttonTransparent" onClick={() => createOffer()}><i class="fa fa-phone fs-1 m-3" aria-hidden="true"></i></button>
+      </>
     )
   }
   else if(answerVisible) {
     return(
-      <div>
-        <button onClick={() => createAnswer()}>Answer</button>
-      </div>
+      <button className="text-docaration-none buttonTransparent" onClick={() => createAnswer()}><i class="fa fa-phone fs-1 m-3 text-success"  aria-hidden="true"></i></button>
     )
   }
 }
   function onStop(){
-      // videoRef.current.destroy()
+    alert('here')
+    socket.emit('disconnect')
+    localVideoRef.current.destroy()
   }
 
 
+  const DisableMicrophone = () => {
+    setMicrophone(!Microphone)
+    localVideoRef.current.srcObject.getAudioTracks().forEach(track => track.enabled = !track.enabled);
+
+  }
+
+  const DisableVideo = () => {
+    setVideo(!Video)
+    localVideoRef.current.srcObject.getVideoTracks().forEach(track => track.enabled = !track.enabled);
+  }
+
+  // function disableVideo(){
+  //   let stream = localVideoRef.current.srcObject 
+  //   const tracks = stream.getTracks();
+
+  // tracks.forEach((track) => {
+  //   track.stop();
+  // });
+  // localVideoRef.current.srcObject = null;
+  // }
 
   return (
-    <div className="container-fluid m-0 p-0 position-relative">
-     <div className="d-flex">
+    <div className="container-fluid m-0 p-0">
+           {/* <div className="alert alert-dark alert-dismissible fade show m-0 text-center" role="alert">
+         <h5><b>{status}</b></h5>
+         <button type="button" class="btn-small btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div> */}
+     <div className="row d-flex row align-items-center bg-dark">
+     <div className="col-sm-6">
      <video className="fullHeight" ref={localVideoRef}  autoPlay/>
-      <video className="fullHeight" ref={remoteVideoRef}  autoPlay/>
      </div>
-        <div className="position-absolute bottom-0 start-50 end-50">
-          <div className="d-flex align-items-center justify-content-around">
-            {/* <button className="text-docaration-none buttonTransparent"><i class="fa fa-phone fs-1 m-3" aria-hidden="true"></i></button>
-            <button className="text-docaration-none buttonTransparent" > <i class="fa fa-video-camera fs-1 m-3" aria-hidden="true"></i></button>
-            <button className="text-docaration-none buttonTransparent" onClick={() => onStop()}><i class="fa fa-times-circle fs-1 m-3" aria-hidden="true"></i></button>   */}
-            <br></br>
-            <br></br> <br></br> <br></br> <br></br>
-            <br></br> <br></br> <br></br> <br></br> <br></br>
-          </div>
+      <div className="col-sm-6">
+      <video className="fullHeight" ref={remoteVideoRef}  autoPlay/>
       </div>
-     
-          {/* <button onClick={() => createOffer()}>Create Offer</button>
-          <button onClick={() => createAnswer()}>Create Answer</button> */}
+     </div>
+          <div className="d-flex align-items-center justify-content-center">   
+          <button className="text-docaration-none buttonTransparent" onClick={() => DisableMicrophone()}> <i className={`${Microphone ? 'fa fa-microphone' : 'fas fa-microphone-slash text-danger'} fs-1 m-3`} aria-hidden="true"></i></button>
+          <button className="text-docaration-none buttonTransparent" onClick={()=> DisableVideo()}> <i className={`${Video ? 'fas fa-video' : 'fas fa-video-slash text-danger'} fs-1 m-3`} aria-hidden="true"></i></button>
           { showHideButtons()}
-          <div>{status}</div>
-          {/* <br></br>
-          <button onClick={() => setRemoteDescription()}>Set Remote description</button>
-          <button onClick={() => addCandidate()}>Add candidates</button> */}
-          <br></br>
-      <textarea ref={textRef}></textarea>
+         {cancel ?  <button className="text-docaration-none buttonTransparent text-danger" onClick={() => onStop()}><i class="fa fa-times-circle fs-1 m-3" aria-hidden="true"></i></button> : null}
+          </div>
+      <textarea className="d-none" ref={textRef}></textarea>
     </div>
   );
 };
