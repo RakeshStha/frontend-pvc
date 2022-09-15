@@ -127,15 +127,14 @@ const showHideButtons = () => {
   if(offerVisible){
     return(
       <div>
-        <button className="text-docaration-none buttonTransparent" onClick={() => createOffer()}><i class="fa fa-phone fs-1 m-3" aria-hidden="true"></i></button>
-        {/* <button onClick={() => createOffer()}>Call</button> */}
+        <button onClick={() => createOffer()}>Call</button>
       </div>
     )
   }
   else if(answerVisible) {
     return(
       <div>
-        <button className="text-docaration-none buttonTransparent" onClick={() => createAnswer()}><i class="fa fa-phone fs-1 m-3 text-success"  aria-hidden="true"></i></button>
+        <button onClick={() => createAnswer()}>Answer</button>
       </div>
     )
   }
