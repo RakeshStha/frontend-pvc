@@ -153,12 +153,10 @@ const Home = () => {
 const showHideButtons = () => {
   if(offerVisible){
     return(
-      <>
         <button className="text-docaration-none buttonTransparent" onClick={() => createOffer()}><i class="fa fa-phone fs-1 m-3" aria-hidden="true"></i></button>
-      </>
     )
   }
-  else if(answerVisible) {
+  if(answerVisible) {
     return(
       <button className="text-docaration-none buttonTransparent" onClick={() => createAnswer()}><i class="fa fa-phone fs-1 m-3 text-success"  aria-hidden="true"></i></button>
     )
@@ -166,8 +164,9 @@ const showHideButtons = () => {
 }
   function onStop(){
     alert('here')
-    socket.emit('disconnect')
-    localVideoRef.current.destroy()
+    window.location.reload();
+    // socket.emit('disconnect')
+    // localVideoRef.current.destroy()
   }
 
 
@@ -194,10 +193,10 @@ const showHideButtons = () => {
 
   return (
     <div className="container-fluid m-0 p-0">
-           {/* <div className="alert alert-dark alert-dismissible fade show m-0 text-center" role="alert">
+           <div className="alert alert-dark alert-dismissible fade show m-0 text-center" role="alert">
          <h5><b>{status}</b></h5>
          <button type="button" class="btn-small btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div> */}
+        </div>
      <div className="row d-flex row align-items-center bg-dark">
      <div className="col-sm-6">
      <video className="fullHeight" ref={localVideoRef}  autoPlay/>
