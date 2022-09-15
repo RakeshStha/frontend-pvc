@@ -62,7 +62,7 @@ const Home = () => {
       pc.current.setRemoteDescription(new RTCSessionDescription(data.sdp))
       textRef.current.value = JSON.stringify(data.sdp)
 
-      if(data.sdp.type === 'offer'){
+      if(data?.sdp.type === 'offer'){
         setOfferVisible(false)
         setAnswerVisible(true)
         setStatus('Incoming call ...')
@@ -74,6 +74,8 @@ const Home = () => {
         incomingAudio.pause()
         callingAudio.loop=false
         callingAudio.pause()
+        setAnswerVisible(false)
+        setOfferVisible(false)
         setStatus('Congratulation your are connected successfully')
      
       }
@@ -125,7 +127,8 @@ const Home = () => {
     }).then(sdp => {
       //send the sdp to the server
       processSDP(sdp)
-      setOfferVisible(false)
+      // setOfferVisible(false)
+      setAnswerVisible(false)
       setStatus('Calling...')
       setCancel(true)
       callingAudio.loop = true
@@ -156,7 +159,7 @@ const showHideButtons = () => {
         <button className="text-docaration-none buttonTransparent" onClick={() => createOffer()}><i class="fa fa-phone fs-1 m-3" aria-hidden="true"></i></button>
     )
   }
-  if(answerVisible) {
+  else if(answerVisible) {
     return(
       <button className="text-docaration-none buttonTransparent" onClick={() => createAnswer()}><i class="fa fa-phone fs-1 m-3 text-success"  aria-hidden="true"></i></button>
     )
@@ -181,16 +184,6 @@ const showHideButtons = () => {
     localVideoRef.current.srcObject.getVideoTracks().forEach(track => track.enabled = !track.enabled);
   }
 
-  // function disableVideo(){
-  //   let stream = localVideoRef.current.srcObject 
-  //   const tracks = stream.getTracks();
-
-  // tracks.forEach((track) => {
-  //   track.stop();
-  // });
-  // localVideoRef.current.srcObject = null;
-  // }
-
   return (
     <div className="container-fluid m-0 p-0">
            <div className="alert alert-dark alert-dismissible fade show m-0 text-center" role="alert">
@@ -211,7 +204,7 @@ const showHideButtons = () => {
           { showHideButtons()}
          {cancel ?  <button className="text-docaration-none buttonTransparent text-danger" onClick={() => onStop()}><i class="fa fa-times-circle fs-1 m-3" aria-hidden="true"></i></button> : null}
           </div>
-      <textarea className="d-none" ref={textRef}></textarea>
+      <textarea className="" ref={textRef}></textarea>
     </div>
   );
 };
