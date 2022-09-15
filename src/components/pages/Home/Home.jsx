@@ -35,26 +35,6 @@ const Home = () => {
 
 
   useEffect(() => {
-    const constraints = {
-      audio: true,
-      video: true,
-    }
-    // console.log("@data",  constraints)
-
-    navigator.mediaDevices.getUserMedia(constraints)
-    .then(stream => {
-      //display video
-      // console.log("@data", stream)
-   localVideoRef.current.srcObject = stream
-
-   stream.getTracks().forEach(track => {
-    _pc.addTrack(track, stream)
-   })
-    })
-    .catch(e => {
-      console.log('getUsermedia Error: ', e)
-    })
-
     //Printing the sdp get from the server
     socket.on('sdp', data => {
       console.log(data)
@@ -75,7 +55,7 @@ const Home = () => {
         incomingAudio.pause()
         callingAudio.loop=false
         callingAudio.pause()
-        
+        setCancel(true)
         setStatus('Congratulation your are connected successfully')
      
       }
@@ -87,6 +67,27 @@ const Home = () => {
      // candidates.current = [...candidates.current, candidate]
       pc.current.addIceCandidate(new RTCIceCandidate(candidate))
     })
+
+    const constraints = {
+      audio: true,
+      video: true,
+    }
+    // console.log("@data",  constraints)
+
+    navigator.mediaDevices.getUserMedia(constraints)
+    .then(stream => {
+      //display video
+      // console.log("@data", stream)
+   localVideoRef.current.srcObject = stream
+
+   stream.getTracks().forEach(track => {
+    _pc.addTrack(track, stream)
+   })
+    })
+    .catch(e => {
+      console.log('getUsermedia Error: ', e)
+    })
+    
     const _pc = new RTCPeerConnection(null)
     _pc.onicecandidate = (e) => {
       if(e.candidate)
