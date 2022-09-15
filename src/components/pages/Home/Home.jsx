@@ -30,7 +30,6 @@ const Home = () => {
   const [status, setStatus] = useState("Click on call button to make a call")
   const [cancel, setCancel] = useState(false)
   
-  const _pc = new RTCPeerConnection(null)
   const pc = useRef(new RTCPeerConnection(null))
   const socket = socketIOClient(ENDPOINT);
 
@@ -59,7 +58,7 @@ const Home = () => {
     //Printing the sdp get from the server
     socket.on('sdp', data => {
       console.log(data)
-      pc.current.setRemoteDescription(new RTCSessionDescription(data.sdp))
+      pc.current.setRemoteDescription(new RTCSessionDescription(data?.sdp))
       textRef.current.value = JSON.stringify(data.sdp)
 
       if(data?.sdp.type === 'offer'){
@@ -70,12 +69,13 @@ const Home = () => {
         incomingAudio.play()
       }
       else{
+        setAnswerVisible(false)
+        setOfferVisible(false)
         incomingAudio.loop=false
         incomingAudio.pause()
         callingAudio.loop=false
         callingAudio.pause()
-        setAnswerVisible(false)
-        setOfferVisible(false)
+        
         setStatus('Congratulation your are connected successfully')
      
       }
@@ -87,7 +87,7 @@ const Home = () => {
      // candidates.current = [...candidates.current, candidate]
       pc.current.addIceCandidate(new RTCIceCandidate(candidate))
     })
-
+    const _pc = new RTCPeerConnection(null)
     _pc.onicecandidate = (e) => {
       if(e.candidate)
       console.log(JSON.stringify(e.candidate))
@@ -127,8 +127,8 @@ const Home = () => {
     }).then(sdp => {
       //send the sdp to the server
       processSDP(sdp)
-      // setOfferVisible(false)
-      setAnswerVisible(false)
+      setOfferVisible(false)
+      // setAnswerVisible(false)
       setStatus('Calling...')
       setCancel(true)
       callingAudio.loop = true
@@ -145,10 +145,10 @@ const Home = () => {
       processSDP(sdp)
       setAnswerVisible(false)
       setCancel(true)
-      incomingAudio.loop=false
-      incomingAudio.pause()
-      callingAudio.loop=false
-      callingAudio.pause()
+      // incomingAudio.loop=false
+      // incomingAudio.pause()
+      // callingAudio.loop=false
+      // callingAudio.pause()
       setStatus('Congratulation your are connected successfully')
     }).catch(e => console.log(e))
   }
@@ -166,7 +166,7 @@ const showHideButtons = () => {
   }
 }
   function onStop(){
-    alert('here')
+    alert('You are going to refresh')
     window.location.reload();
     // socket.emit('disconnect')
     // localVideoRef.current.destroy()
@@ -204,7 +204,7 @@ const showHideButtons = () => {
           { showHideButtons()}
          {cancel ?  <button className="text-docaration-none buttonTransparent text-danger" onClick={() => onStop()}><i class="fa fa-times-circle fs-1 m-3" aria-hidden="true"></i></button> : null}
           </div>
-      <textarea className="" ref={textRef}></textarea>
+      <textarea className="d-none" ref={textRef}></textarea>
     </div>
   );
 };
